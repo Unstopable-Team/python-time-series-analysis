@@ -17,7 +17,7 @@ config_file = 'config.ini'
 session = wapi.Session(config_file=config_file)
 
 # Start Date of data
-start = pd.Timestamp('2021-01-01 00:00')
+start = pd.Timestamp('2020-01-01 00:00')
 
 # End date of data (last date is EXCLUDED!)
 # end = pd.Timestamp('2021-03-20 00:00')
@@ -69,6 +69,17 @@ day_ahead_price = get_pandas_data('vmap')
 intra_day_price = get_pandas_data('vmap-id1')
 
 absolute_price_change = intra_day_price.subtract(day_ahead_price)
+absolute_price_change = absolute_price_change.abs()
+
+def get_correlation(quantity_name, absolute_price_change=absolute_price_change):
+    quantity_df = get_pandas_data(quantity_name)
+
+    print("Correlation with {0}: ".format(quantity_name), quantity_df.corr(absolute_price_change))
+
+def get_df_correlation(quantity_df, absolute_price_change=absolute_price_change):
+
+    print("Correlation with {0}: ".format(quantity_df.name), quantity_df.corr(absolute_price_change))
+
 
 """
 # day_ahead_price.plot(figsize=(10,6))
@@ -89,42 +100,51 @@ plt.show()
 # Correlation with Wind
 # =============================================================================
 
-"""
+#"""
 wind_actual = get_pandas_data('wind-actual')
 wind_normal = get_pandas_data('wind-normal')
 absolute_wind_strength = wind_actual.subtract(wind_normal)
 
-correlation = absolute_wind_strength.corr(absolute_price_change)
-print(correlation)
+get_df_correlation(absolute_wind_strength)
 #"""
 
 
 # =============================================================================
-# Correlation with Imbalance
+# Correlations with single variables
 # =============================================================================
 
-"""
-imbalance_price = get_pandas_data('imbalance-price')
-grid_imbalance = get_pandas_data('grid-imbalance')
-
-print("Correlation with imbalance price: ", imbalance_price.corr(absolute_price_change))
-print("Correlation with grid imbalance: ", grid_imbalance.corr(absolute_price_change))
+#"""
+get_correlation('imbalance-price')
+get_correlation('grid-imbalance')
+get_correlation('consumption-actual')
 #"""
 
 
 # =============================================================================
-# Correlation with Consumption
+# Correlation with Renewables
 # =============================================================================
 
-consumption_actual = get_pandas_data('consumption-actual')
+nuclear_prod = get_pandas_data('nuclear-prod')
+coal_prod = get_pandas_data('coal-prod')
+lignite_prod = get_pandas_data('lignite-prod')
+gas_prod = get_pandas_data('gas-prod')
 
-print("Correlation with imbalance price: ", consumption_actual.corr(absolute_price_change))
+wind_actual = get_pandas_data('wind-actual')
+solar_actual = get_pandas_data('solar-actual')
+
+total_renewable = solar_actual.add(wind_actual)
+total_nonrenewable = nuclear_prod.add(coal_prod).add(lignite_prod).add(gas_prod)
+share_of_renewables = total_renewable.divide(total_renewable.add(total_nonrenewable))
+
+get_df_correlation(total_renewable)
+get_df_correlation(total_nonrenewable)
+get_df_correlation(share_of_renewables)
 
 
 """
 # wind_actual.plot(figsize=(10,6))
-# wind_normal.plot(figsize=(10,6))
-absolute_wind_strength.plot(figsize=(10,6))
+absolute_price_change.plot(figsize=(10,6))
+#consumption_actual.plot(figsize=(10,6))
 # plt.title('absolute price change')
 plt.show()
 #"""
