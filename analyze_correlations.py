@@ -17,7 +17,7 @@ config_file = 'config.ini'
 session = wapi.Session(config_file=config_file)
 
 # Start Date of data
-start = pd.Timestamp('2021-03-01 00:00')
+start = pd.Timestamp('2020-01-01 00:00')
 
 # End date of data (last date is EXCLUDED!)
 # end = pd.Timestamp('2021-03-20 00:00')
@@ -44,11 +44,9 @@ name_dict = {
     'gas-prod'          : 'pro de thermal gas mwh/h cet min15 a',
     'gas-capacity'      : 'cap de avail thermal gas mw cet h f',
     'wind-actual'       : 'pro de wnd mwh/h cet min15 a',
-    'wind-forecast-1'   : 'pro de wnd ec00 mwh/h cet min15 f'
     'wind-normal'       : 'pro de wnd mwh/h cet min15 n',
     'solar-actual'      : 'pro de spv mwh/h cet min15 a',
     'solar-normal'      : 'pro de spv mwh/h cet min15 n',
-    'solar-forecast'    : 'pro de spv ec00 mwh/h cet min15 f',
     'consumption-actual': 'con de mwh/h cet min15 a',
     'consumption-normal': 'con de mwh/h cet min15 n',
     'temp-normal'       : 'tt de con °c cet min15 n'
@@ -64,28 +62,86 @@ def get_pandas_data(quantity_name, start=start, end=end, session=session, name_d
 
 
 # =============================================================================
-# Relative Price Change
+# Absolute Price Change
 # =============================================================================
 
 day_ahead_price = get_pandas_data('day-ahead-price')
 intra_day_price = get_pandas_data('vmap')
 
 absolute_price_change = intra_day_price.subtract(day_ahead_price)
-relative_price_change = absolute_price_change.divide(day_ahead_price)
+absolute_price_change = absolute_price_change.abs()
 
-max_relative_price_change = relative_price_change[relative_price_change > 0.1]
-min_relative_price_change = relative_price_change[relative_price_change < -0.1]
+def get_correlation(quantity_name, absolute_price_change=absolute_price_change):
+    quantity_df = get_pandas_data(quantity_name)
+
+    print("Correlation with {0}: ".format(quantity_name), quantity_df.corr(absolute_price_change))
+
+def get_df_correlation(quantity_df, absolute_price_change=absolute_price_change):
+
+    print("Correlation with {0}: ".format(quantity_df.name), quantity_df.corr(absolute_price_change))
 
 
-relative_price_change.plot()
-max_relative_price_change.plot(marker='o', c='r', ls='')
-min_relative_price_change.plot(marker='o', c='g', ls='')
-plt.ylim(-0.5,0.5)
+"""
+# day_ahead_price.plot(figsize=(10,6))
+# intra_day_price.plot(figsize=(10,6))
+absolute_price_change.plot(figsize=(10,6))
+# plt.title('absolute price change')
 plt.show()
+#"""
+
+# "major impact events" are marked by a minimum 100 % relative change between day ahead and intraday price
+# possible events:
+# 
+
+# =============================================================================
+# Correlation with Wind
+# =============================================================================
+
+#"""
+wind_actual = get_pandas_data('wind-actual')
+wind_normal = get_pandas_data('wind-normal')
+absolute_wind_strength = wind_actual.subtract(wind_normal)
+
+get_df_correlation(absolute_wind_strength)
+#"""
 
 
-# Indicator: High Imbalance Price
+# =============================================================================
+# Correlations with single variables
+# =============================================================================
 
-# Indicator: Increase in Renewable Energies
+#"""
+get_correlation('imbalance-price')
+get_correlation('grid-imbalance')
+get_correlation('consumption-actual')
+#"""
 
 
+# =============================================================================
+# Correlation with Renewables
+# =============================================================================
+
+nuclear_prod = get_pandas_data('nuclear-prod')
+coal_prod = get_pandas_data('coal-prod')
+lignite_prod = get_pandas_data('lignite-prod')
+gas_prod = get_pandas_data('gas-prod')
+
+wind_actual = get_pandas_data('wind-actual')
+solar_actual = get_pandas_data('solar-actual')
+
+total_renewable = solar_actual.add(wind_actual)
+total_nonrenewable = nuclear_prod.add(coal_prod).add(lignite_prod).add(gas_prod)
+share_of_renewables = total_renewable.divide(total_renewable.add(total_nonrenewable))
+
+get_df_correlation(total_renewable)
+get_df_correlation(total_nonrenewable)
+get_df_correlation(share_of_renewables)
+
+
+"""
+# wind_actual.plot(figsize=(10,6))
+absolute_price_change.plot(figsize=(10,6))
+#consumption_actual.plot(figsize=(10,6))
+# plt.title('absolute price change')
+plt.show()
+#"""
