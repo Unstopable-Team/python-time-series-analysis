@@ -19,6 +19,9 @@ import wapi
 if os.path.isdir('data_base') is False:
     os.mkdir('data_base')
 
+config_file = 'config.ini'
+session = wapi.Session(config_file=config_file)
+
 
 # =============================================================================
 # Get Data from Volue
@@ -26,9 +29,6 @@ if os.path.isdir('data_base') is False:
 # =============================================================================
 
 #"""
-config_file_path = 'config.ini'
-session = wapi.Session(config_file=config_file_path)
-
 # Define curve names
 curve_names = [ # get day-ahead prices ? 
     'pri de intraday €/mwh cet min15 a',            # actual intraday prices
@@ -82,3 +82,5 @@ for e in events:
         # Stop code if no data was received for an hour
         break
 
+
+# Adapted from: https://github.com/wattsight/wapi-python/blob/master/examples/Listening_for_changes/renewables_database.py 
