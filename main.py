@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd 
 
 import wapi
-from entsoe import EntsoeRawClient
+from entsoe import EntsoeRawClient, EntsoePandasClient
 
 
 # =============================================================================
@@ -36,17 +36,14 @@ print(df.head())
 # =============================================================================
 
 #"""
+key = str(np.genfromtxt('entsoe.txt',dtype='str'))
+client = EntsoePandasClient(api_key=key)
 
-# Does not work yet: TypeError: iteration over a 0-d array
+start = pd.Timestamp('20171201', tz='Europe/Brussels')
+end = pd.Timestamp('20180101', tz='Europe/Brussels')
+country_code = 'BE'  # Belgium
 
-key = np.loadtxt('entsoe.txt', dtype=str)
-
-client = EntsoeRawClient(api_key=key)
-
-start = pd.Timestamp('2018-01-01T14:00Z', tz='Europe/Brussels')
-end = pd.Timestamp('2018-02-01T14:00Z', tz='Europe/Brussels')
-country_code = 'BE'  
-client.query_day_ahead_prices(country_code, start, end)
-
+ts = client.query_day_ahead_prices(country_code, start=start,end=end)
+ts.to_csv('outfile.csv')
 #"""
 
