@@ -44,7 +44,7 @@ name_dict = {
     'gas-prod'          : 'pro de thermal gas mwh/h cet min15 a',
     'gas-capacity'      : 'cap de avail thermal gas mw cet h f',
     'wind-actual'       : 'pro de wnd mwh/h cet min15 a',
-    'wind-forecast-1'   : 'pro de wnd ec00 mwh/h cet min15 f'
+    'wind-forecast-1'   : 'pro de wnd ec00 mwh/h cet min15 f',
     'wind-normal'       : 'pro de wnd mwh/h cet min15 n',
     'solar-actual'      : 'pro de spv mwh/h cet min15 a',
     'solar-normal'      : 'pro de spv mwh/h cet min15 n',
@@ -62,6 +62,14 @@ def get_pandas_data(quantity_name, start=start, end=end, session=session, name_d
 
     return(df)
 
+def get_pandas_from_instance(quantity_name, issue_date=start, session=session, name_dict=name_dict):
+
+    curve = session.get_curve(name=name_dict[quantity_name])
+    df = curve.get_instance(issue_date=issue_date).to_pandas()
+
+    return(df)
+
+
 
 # =============================================================================
 # Relative Price Change
@@ -73,19 +81,71 @@ intra_day_price = get_pandas_data('vmap')
 absolute_price_change = intra_day_price.subtract(day_ahead_price)
 relative_price_change = absolute_price_change.divide(day_ahead_price)
 
-max_relative_price_change = relative_price_change[relative_price_change > 0.1]
-min_relative_price_change = relative_price_change[relative_price_change < -0.1]
+max_relative_price_change = relative_price_change[relative_price_change > 0.1]*0
+min_relative_price_change = relative_price_change[relative_price_change < -0.1]*0
 
-
+"""
 relative_price_change.plot()
 max_relative_price_change.plot(marker='o', c='r', ls='')
 min_relative_price_change.plot(marker='o', c='g', ls='')
 plt.ylim(-0.5,0.5)
 plt.show()
+#"""
 
 
-# Indicator: High Imbalance Price
+# =============================================================================
+# High Imbalance Prices
+# =============================================================================
 
-# Indicator: Increase in Renewable Energies
+# imbalance_price = get_pandas_data('imbalance-price')
+# events_imbalance_price = imbalance_price[imbalance_price.abs() > 150] * 0
 
+"""
+imbalance_price.plot()
+max_relative_price_change.plot(marker='o', c='r', ls='')
+min_relative_price_change.plot(marker='o', c='g', ls='')
+events_imbalance_price.plot(marker='o', c='k', ls='')
+#plt.ylim(-0.5,0.5)
+plt.show()
+#"""
+
+
+# =============================================================================
+# More Renewable Production
+# =============================================================================
+
+# wind_actual = get_pandas_data('wind-actual')
+# solar_actual = get_pandas_from_instance('solar-actual')
+# total_renewable = solar_actual.add(wind_actual)
+
+"""
+total_renewable.plot()
+max_relative_price_change.plot(marker='o', c='r', ls='')
+min_relative_price_change.plot(marker='o', c='g', ls='')
+#events_imbalance_price.plot(marker='o', c='k', ls='')
+#plt.ylim(-0.5,0.5)
+plt.show()
+#"""
+
+
+# =============================================================================
+# Wind - Actual vs Forecast
+# =============================================================================
+
+wind_actual = get_pandas_data('wind-actual')
+wind_forecast = get_pandas_from_instance('wind-forecast-1')
+
+curve = session.get_curve(name=name_dict['wind-forecast-1'])
+df = curve.get_instance(issue_date=start).to_pandas()
+print(df)
+
+"""
+wind_actual.plot()
+wind_forecast.plot()
+max_relative_price_change.plot(marker='o', c='r', ls='')
+min_relative_price_change.plot(marker='o', c='g', ls='')
+#events_imbalance_price.plot(marker='o', c='k', ls='')
+#plt.ylim(-0.5,0.5)
+plt.show()
+#"""
 
