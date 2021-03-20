@@ -30,7 +30,7 @@ end = pd.to_datetime("now")
 
 name_dict = {
     'day-ahead-price'   : 'pri de spot €/mwh cet h a',
-    'vmap'              : 'pri de intraday vwap id1 €/mwh cet h a',
+    'vmap'              : 'pri de intraday vwap €/mwh cet h a',
     'vmap-id1'          : 'pri de intraday vwap id1 €/mwh cet h a',
     'vmap-id3'          : 'pri de intraday vwap id3 €/mwh cet h a',
     'imbalance-price'   : 'pri de imb stlmt €/mwh cet min15 s',
@@ -62,26 +62,69 @@ def get_pandas_data(quantity_name, start=start, end=end, session=session, name_d
 
 
 # =============================================================================
-# Data Visualization
+# Absolute Price Change
 # =============================================================================
 
-day_ahead_price = get_pandas_data('day-ahead-price')
-intra_day_price = get_pandas_data('vmap')
+day_ahead_price = get_pandas_data('vmap')
+intra_day_price = get_pandas_data('vmap-id1')
 
-day_ahead_price_arr = day_ahead_price.to_numpy()
-intra_day_price_arr = intra_day_price.to_numpy()
-
-relative_price_change = (intra_day_price_arr - day_ahead_price_arr)/day_ahead_price_arr
-
-print(relative_price_change)
-
-# plt.figure(1)
-# plt.plot(relative_price_change)
-# plt.show()
+absolute_price_change = intra_day_price.subtract(day_ahead_price)
 
 """
-df_1.plot(figsize=(10,6))
-df_2.plot(figsize=(10,6))
-#plt.title(quantity)
+# day_ahead_price.plot(figsize=(10,6))
+# intra_day_price.plot(figsize=(10,6))
+absolute_price_change.plot(figsize=(10,6))
+# plt.title('absolute price change')
+plt.show()
+#"""
+
+# "major impact events" are marked by a minimum 100 % relative change between day ahead and intraday price
+# the question is: how do these events correlated with impact factors, such as 
+# - large amount of wind / sunshine 
+# - production by different types 
+# - consumption
+
+
+# =============================================================================
+# Correlation with Wind
+# =============================================================================
+
+"""
+wind_actual = get_pandas_data('wind-actual')
+wind_normal = get_pandas_data('wind-normal')
+absolute_wind_strength = wind_actual.subtract(wind_normal)
+
+correlation = absolute_wind_strength.corr(absolute_price_change)
+print(correlation)
+#"""
+
+
+# =============================================================================
+# Correlation with Imbalance
+# =============================================================================
+
+"""
+imbalance_price = get_pandas_data('imbalance-price')
+grid_imbalance = get_pandas_data('grid-imbalance')
+
+print("Correlation with imbalance price: ", imbalance_price.corr(absolute_price_change))
+print("Correlation with grid imbalance: ", grid_imbalance.corr(absolute_price_change))
+#"""
+
+
+# =============================================================================
+# Correlation with Consumption
+# =============================================================================
+
+consumption_actual = get_pandas_data('consumption-actual')
+
+print("Correlation with imbalance price: ", consumption_actual.corr(absolute_price_change))
+
+
+"""
+# wind_actual.plot(figsize=(10,6))
+# wind_normal.plot(figsize=(10,6))
+absolute_wind_strength.plot(figsize=(10,6))
+# plt.title('absolute price change')
 plt.show()
 #"""
