@@ -52,25 +52,36 @@ name_dict = {
     'temp-normal'       : 'tt de con °c cet min15 n'
 }
 
+def get_pandas_data(quantity_name, start=start, end=end, session=session, name_dict=name_dict):
+    """Obtains a pandas dataframe for a given quantity from the volue API."""
+
+    curve = session.get_curve(name=name_dict[quantity_name])
+    df = curve.get_data(data_from=start, data_to=end).to_pandas()
+
+    return(df)
+
 
 # =============================================================================
 # Data Visualization
 # =============================================================================
 
-quantity_1 = 'day-ahead-price'
-quantity_2 = 'vmap'
+day_ahead_price = get_pandas_data('day-ahead-price')
+intra_day_price = get_pandas_data('vmap')
 
-curve_1 = session.get_curve(name=name_dict[quantity_1])
-curve_2 = session.get_curve(name=name_dict[quantity_2])
-# print(curve.curve_type)
+day_ahead_price_arr = day_ahead_price.to_numpy()
+intra_day_price_arr = intra_day_price.to_numpy()
 
-df_1 = curve_1.get_data(data_from=start, data_to=end).to_pandas()
-df_2 = curve_2.get_data(data_from=start, data_to=end).to_pandas()
+relative_price_change = (intra_day_price_arr - day_ahead_price_arr)/day_ahead_price_arr
 
-print(df_1.head())
+print(relative_price_change)
 
+# plt.figure(1)
+# plt.plot(relative_price_change)
+# plt.show()
+
+"""
 df_1.plot(figsize=(10,6))
 df_2.plot(figsize=(10,6))
 #plt.title(quantity)
 plt.show()
-
+#"""
