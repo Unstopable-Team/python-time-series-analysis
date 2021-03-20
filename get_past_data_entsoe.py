@@ -15,7 +15,7 @@ from entsoe import EntsoeRawClient, EntsoePandasClient
 # =============================================================================
 
 start = pd.Timestamp('20180101', tz='Europe/Berlin')
-end = pd.Timestamp('20210101', tz='Europe/Berlin')
+end = pd.Timestamp('20210320', tz='Europe/Berlin')
 country_code = 'DE'  # Germany
 
 # Create a "data_base" folder, where the csv files will be saved
@@ -37,7 +37,7 @@ client = EntsoePandasClient(api_key=key)
 
 # NoMatchingDataError
 # ts_day_ahead = client.query_day_ahead_prices(country_code, start=start,end=end)
-"""
+
 ts_load = client.query_load(country_code, start=start,end=end)
 ts_load.to_csv('data_base/ts_load.csv')
 
@@ -46,7 +46,7 @@ ts_load_forecast.to_csv('data_base/ts_load_forecast.csv')
 
 ts_generation_forecast = client.query_generation_forecast(country_code, start=start,end=end)
 ts_generation_forecast.to_csv('data_base/ts_generation_forecast.csv')
-"""
+
 
 # Dataframes
 
@@ -63,8 +63,8 @@ df_crossborder_flows = client.query_crossborder_flows('DE', 'DK', start=start,en
 df_crossborder_flows.to_csv('data_base/df_crossborder_flows.csv')
 
 
-# BadRequest: 
 # df_imbalance_prices = client.query_imbalance_prices(country_code, start=start,end=end, psr_type=None)
+# df_imbalance_prices.to_csv('data_base/df_imbalance_prices.csv')
 
 # BadRequest: 
 # df_unavailability_of_generation_units = client.query_unavailability_of_generation_units(country_code, start=start,end=end, docstatus=None)

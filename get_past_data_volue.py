@@ -5,7 +5,6 @@
 
 import numpy as np 
 import pandas as pd 
-import time 
 import os 
 
 import wapi
@@ -26,7 +25,8 @@ session = wapi.Session(config_file=config_file)
 start = pd.Timestamp('2018-01-01 00:00')
 
 # End date of data (last date is EXCLUDED!)
-end = pd.Timestamp('2021-01-01 00:00')
+# end = pd.Timestamp('2021-03-20 00:00')
+end = pd.to_datetime("now")
 
 
 # =============================================================================
@@ -34,16 +34,17 @@ end = pd.Timestamp('2021-01-01 00:00')
 # API Wrapper: https://github.com/wattsight/wapi-python
 # =============================================================================
 
+#"""
 # Define curve names
-curve_names = [ # get day-ahead prices ? 
-    'pri de intraday €/mwh cet min15 a',            # actual intraday prices
-    'pri de imb stlmt €/mwh cet min15 a'            # imbalance price 
+curve_names = [
+    'pri de spot €/mwh cet h a',                    # day-ahead prices
+    'pri de intraday €/mwh cet h a',                # actual intraday prices
     'pri de intraday vwap €/mwh cet h a',           # volume weighted average price (vwap)
-    # 'pri de intraday vwap id3 €/mwh cet min15 ca',  # vwap 3 h before delivery
-    # 'pri de intraday vwap id1 €/mwh cet min15 ca',  # vwap 1 h before delivery
-    'con de intraday mwh/h cet min15 a',            # actual consumption 
-    # wapi.util.CurveException: Failed to load curve data: b'You do not have access to this' (403)
-    #'vol de imb sys mw cet min15 a'                 # system imbalance
+    'pri de intraday vwap id3 €/mwh cet h ca',      # vwap 3 h before delivery
+    'pri de intraday vwap id1 €/mwh cet h ca',      # vwap 1 h before delivery
+    'pri de imb stlmt €/mwh cet min15 s'            # imbalance price 
+    'pri cwe imb stlmt igcc €/mwh cet min15 s'      # grid imbalance
+    'con de mwh/h cet min15 a',                     # actual consumption 
 ]
 
 for curve_name in curve_names:
@@ -78,3 +79,20 @@ for curve_name in curve_names:
 
 
 # Adapted from: https://github.com/wattsight/wapi-python/blob/master/examples/Timeseries_curve_examples/ts_get_multiple_curves.py
+#"""
+
+
+# =============================================================================
+# Plot Data as Example
+# =============================================================================
+
+"""
+identifier = 'pri de spot €/mwh cet h a'
+df = pd.read_csv('./data_base/{0}'.format(identifier), skiprows=1, names=['date', identifier])
+print(df.head())
+
+df['date'] = pd.to_datetime(df['date'])
+df = df.set_index('date')
+df.plot()
+plt.show()
+#"""

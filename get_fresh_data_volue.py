@@ -30,7 +30,7 @@ session = wapi.Session(config_file=config_file)
 
 #"""
 # Define curve names
-curve_names = [ # get day-ahead prices ? 
+curve_names = [ 
     'pri de intraday €/mwh cet min15 a',            # actual intraday prices
     'pri de imb stlmt €/mwh cet min15 a'            # imbalance price 
     'pri de intraday vwap €/mwh cet h a',           # volume weighted average price (vwap)
